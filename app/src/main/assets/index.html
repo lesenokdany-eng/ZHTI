@@ -51,6 +51,18 @@ const supabaseClient = {
 };
 const URL='https://jylcbiznpnaezxeumcsm.supabase.co',KEY='sb_publishable_xeLszRP0RSYub9YouIq8Ug_i7FEhJY3';
 const db=supabaseClient.createClient(URL,KEY);
+window.onFcmToken=async token=>{
+ if(!token)return;
+ const session=localStorage.getItem('zhti_account_token');
+ if(!session)return;
+ if(localStorage.getItem('zhti_fcm_registered')===token)return;
+ try{
+  const {data,error}=await db.rpc('zhti_register_fcm_token',{p_token:session,p_fcm_token:token});
+  if(error)throw error;
+  localStorage.setItem('zhti_fcm_registered',token);
+  console.log('FCM token registered');
+ }catch(e){console.warn('FCM token registration failed:',e.message||e)}
+};
 const $=id=>document.getElementById(id);let players=[],events=[],calendarEvents=[],incomingBattles=[],myPlayer=null,adminPassword=null,view=new Date(),selected=new Date().toISOString().slice(0,10),authMode='register';
 function showLobby(username){$('authScreen').classList.add('app-hidden');$('appRoot').classList.remove('app-hidden');$('welcomeUser').textContent='Вы вошли как: '+username;$('profileUser').textContent='Аккаунт: '+username;loadCallsign();maybeAskNotifications()}
 function maybeAskNotifications(){if(localStorage.getItem('zhti_notification_prompted')==='1')return;$('notifyPrompt').classList.remove('hidden')}
@@ -104,7 +116,7 @@ function renderBattleUI(){
 $('showBattleOptions').onclick=()=>{$('battleOptionsWindow').classList.remove('hidden');$('battleInboxWindow').classList.add('hidden')};
 $('showBattleInbox').onclick=()=>{$('battleInboxWindow').classList.remove('hidden');$('battleOptionsWindow').classList.add('hidden');load()};
 $('battleGame').onchange=()=>{$('battleCustomGame').classList.toggle('hidden',$('battleGame').value!=='Другая игра')};
-$('sendBattleChallenge').onclick=async()=>{const game=$('battleGame').value==='Другая игра'?$('battleCustomGame').value.trim():$('battleGame').value;const opponent_id=$('battleOpponent').value;const battle_type=$('battleType').value;if(!game||!opponent_id)return alert('Выбери игру и соперника');const btn=$('sendBattleChallenge');btn.disabled=true;$('battleSendMessage').textContent='Отправляем вызов…';try{const {data,error}=await db.rpc('zhti_battles',{p_token:localStorage.getItem('zhti_account_token'),p_action:'create',p_payload:{opponent_id,game,battle_type}});if(error)throw error;$('battleSendMessage').textContent='Вызов отправлен! Игрок увидит его в разделе «Вызовы тебе».';alert('Вызов отправлен!');}catch(e){$('battleSendMessage').textContent=e.message||'Не удалось отправить вызов';alert(e.message)}finally{btn.disabled=false}};
+$('sendBattleChallenge').onclick=async()=>{const game=$('battleGame').value==='Другая игра'?$('battleCustomGame').value.trim():$('battleGame').value;const opponent_id=$('battleOpponent').value;const battle_type=$('battleType').value;if(!game||!opponent_id)return alert('Выбери игру и соперника');const btn=$('sendBattleChallenge');btn.disabled=true;$('battleSendMessage').textContent='Отправляем вызов…';try{const sessionToken=localStorage.getItem('zhti_account_token');const {data,error}=await db.rpc('zhti_battles',{p_token:sessionToken,p_action:'create',p_payload:{opponent_id,game,battle_type}});if(error)throw error;if(data?.id){try{await fetch(URL+'/functions/v1/zhti-send-battle-push',{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},body:JSON.stringify({session_token:sessionToken,challenge_id:data.id})})}catch(pushError){console.warn('Push send request failed:',pushError)}}$('battleSendMessage').textContent='Вызов отправлен! Игрок увидит его в разделе «Вызовы тебе».';alert('Вызов отправлен!');}catch(e){$('battleSendMessage').textContent=e.message||'Не удалось отправить вызов';alert(e.message)}finally{btn.disabled=false}};
 window.respondBattle=async(id,decision)=>{try{const {data,error}=await db.rpc('zhti_battles',{p_token:localStorage.getItem('zhti_account_token'),p_action:'respond',p_payload:{id,decision}});if(error)throw error;await load();alert(decision==='accepted'?'Ты принял вызов!':'Ты отклонил вызов.')}catch(e){alert(e.message||'Не удалось ответить на вызов')}};
 
 function renderSelfPlayer(){const box=$('selfPlayerBox');if(myPlayer&&myPlayer.registered){box.innerHTML='<h3>Твой игрок в общей таблице</h3><p><b>'+esc(myPlayer.name)+'</b></p><p class="muted">Позывной: '+(myPlayer.callsign?esc(myPlayer.callsign):'не указан')+'</p><p class="muted">Ник аккаунта добавлен автоматически при регистрации.</p>';}else{$('selfPlayerMessage').textContent='Игрок для этого аккаунта ещё не найден. Обнови приложение или войди заново.';}}
