@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "45934899837",
+    "project_id": "eiig-a89a2",
+    "storage_bucket": "eiig-a89a2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:45934899837:android:eb787e126cdfa54a727714",
+        "android_client_info": {
+          "package_name": "ru.zhti.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAroIi9UjHuTRtTFmXV6EFK6fOaAv6k4Pk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
