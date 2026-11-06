@@ -23,9 +23,32 @@
 <section id="leaders" class="panel hidden"><h2>Победители</h2><h3>Месяц</h3><div id="monthWinner" class="winner"></div><div id="monthBoard"></div><h3>Год</h3><div id="yearWinner" class="winner"></div><div id="yearBoard"></div></section>
 <section id="history" class="panel hidden"><h2>История событий</h2><div id="historyList"></div></section>
 <p class="muted">Общие онлайн-данные. Все изменения проверяются базой данных по аккаунту администратора.</p></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+<script>
+/* Клиент Supabase через стандартный fetch — без внешнего CDN. */
+const supabaseClient = {
+ createClient(baseUrl, apiKey) {
+  const headers={apikey:apiKey,Authorization:'Bearer '+apiKey,'Content-Type':'application/json'};
+  async function request(path,options={}) {
+   const response=await fetch(baseUrl+path,{...options,headers:{...headers,...(options.headers||{})}});
+   const raw=await response.text(); let data=null;
+   try{data=raw?JSON.parse(raw):null}catch(_){data=raw}
+   if(!response.ok) throw new Error(data?.message||data?.hint||data?.details||raw||('HTTP '+response.status));
+   return {data,error:null};
+  }
+  return {
+   rpc(name,params){return request('/rest/v1/rpc/'+encodeURIComponent(name),{method:'POST',body:JSON.stringify(params)})},
+   from(table){
+    let sort='';
+    const q={select(){return q},order(column,opts={}){sort='?order='+encodeURIComponent(column)+'.'+(opts.ascending===false?'desc':'asc');return q},
+     then(resolve,reject){return request('/rest/v1/'+encodeURIComponent(table)+sort).then(resolve,reject)}};
+    return q;
+   },
+   channel(){return {on(){return this},subscribe(){return this}}}
+  };
+ }
+};
 const URL='https://jylcbiznpnaezxeumcsm.supabase.co',KEY='sb_publishable_xeLszRP0RSYub9YouIq8Ug_i7FEhJY3';
-const db=window.supabase.createClient(URL,KEY);
+const db=supabaseClient.createClient(URL,KEY);
 const $=id=>document.getElementById(id);let players=[],events=[],adminPassword=null,view=new Date(),selected=new Date().toISOString().slice(0,10),authMode='register';
 function showLobby(username){$('authScreen').classList.add('app-hidden');$('appRoot').classList.remove('app-hidden');$('welcomeUser').textContent='Вы вошли как: '+username}
 if(localStorage.getItem('zhti_account_token')){showLobby(localStorage.getItem('zhti_account_name')||'пользователь')}else{$('appRoot').classList.add('app-hidden')}
