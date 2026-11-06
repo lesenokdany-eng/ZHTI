@@ -4,6 +4,7 @@
         android:theme="@android:style/Theme.Material.Light.NoActionBar"
         android:label="ЖТИ"
         android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/ic_launcher"
         android:usesCleartextTraffic="true"
         android:hardwareAccelerated="true">
         <activity
