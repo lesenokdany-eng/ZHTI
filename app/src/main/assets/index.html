@@ -31,7 +31,15 @@ const supabaseClient = {
  createClient(baseUrl, apiKey) {
   const headers={apikey:apiKey,Authorization:'Bearer '+apiKey,'Content-Type':'application/json'};
   async function request(path,options={}) {
-   const response=await fetch(baseUrl+path,{...options,headers:{...headers,...(options.headers||{})}});
+   const controller=new AbortController();
+   const timer=setTimeout(()=>controller.abort(),15000);
+   let response;
+   try {
+    response=await fetch(baseUrl+path,{...options,signal:controller.signal,headers:{...headers,...(options.headers||{})}});
+   } catch(e) {
+    if(e.name==='AbortError') throw new Error('Сервер долго не отвечает. Проверь интернет и нажми «Обновить данные».');
+    throw new Error('Нет соединения с сервером. Проверь интернет и попробуй ещё раз.');
+   } finally { clearTimeout(timer); }
    const raw=await response.text(); let data=null;
    try{data=raw?JSON.parse(raw):null}catch(_){data=raw}
    if(!response.ok) throw new Error(data?.message||data?.hint||data?.details||raw||('HTTP '+response.status));
@@ -77,17 +85,49 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const isAdmin=()=>adminPassword!==null;
 const call=async(q)=>{const {data,error}=await q;if(error)throw error;return data};
 function status(t){$('status').textContent=t}
-$('refreshBtn').onclick=()=>load();window.addEventListener('focus',()=>load());document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});setInterval(()=>{if(!document.hidden)load()},10000);
+$('refreshBtn').onclick=()=>load();
+let lastAutoLoad=0;
+window.addEventListener('focus',()=>{if(Date.now()-lastAutoLoad>20000){lastAutoLoad=Date.now();load()}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastAutoLoad>20000){lastAutoLoad=Date.now();load()}});
+setInterval(()=>{if(!document.hidden){lastAutoLoad=Date.now();load()}},30000);
 function loadCallsign(){const v=myPlayer?.callsign||'';$('callsignInput').value=v;$('callsignMessage').textContent=v?'Позывной в общей таблице: '+v:'Позывной ещё не добавлен в таблицу.'}
 $('saveCallsign').onclick=async()=>{const v=$('callsignInput').value.trim();if(v.length>32){$('callsignMessage').textContent='Позывной должен быть не длиннее 32 символов.';return}const btn=$('saveCallsign');btn.disabled=true;$('callsignMessage').textContent='Сохраняем в общую таблицу…';try{const {data,error}=await db.rpc('zhti_update_callsign',{p_token:localStorage.getItem('zhti_account_token'),p_callsign:v});if(error)throw error;myPlayer={...myPlayer,...data,registered:true};$('callsignMessage').textContent=v?'Позывной добавлен в общую таблицу: '+v:'Позывной удалён из таблицы.';await load()}catch(e){$('callsignMessage').textContent=e.message||'Не удалось сохранить позывной'}finally{btn.disabled=false}};
-async function load(){try{players=await call(db.from('zhti_players').select('*').order('name'));events=await call(db.from('zhti_events').select('*').order('occurred_at',{ascending:false}));calendarEvents=await call(db.from('zhti_calendar_events').select('*').order('event_date'));const own=await db.rpc('zhti_self_player',{p_token:localStorage.getItem('zhti_account_token'),p_name:null});if(own.error)throw own.error;myPlayer=own.data;if(window.__zhtiFcmToken&&myPlayer?.registered)window.onFcmToken(window.__zhtiFcmToken);if(myPlayer?.registered){const b=await db.rpc('zhti_battles',{p_token:localStorage.getItem('zhti_account_token'),p_action:'list',p_payload:{}});if(b.error)throw b.error;incomingBattles=b.data?.incoming||[];notifyNewBattleChallenges(incomingBattles)}loadCallsign();render();status('Подключено · общие данные обновлены');}catch(e){status('Ошибка загрузки: '+e.message)}}
+let loadPromise=null,loadAgain=false;
+async function load(){
+ if(loadPromise){loadAgain=true;return loadPromise}
+ loadPromise=(async()=>{
+  try{
+   const token=localStorage.getItem('zhti_account_token');
+   const [p,e,c,own]=await Promise.all([
+    call(db.from('zhti_players').select('*').order('name')),
+    call(db.from('zhti_events').select('*').order('occurred_at',{ascending:false})),
+    call(db.from('zhti_calendar_events').select('*').order('event_date')),
+    db.rpc('zhti_self_player',{p_token:token,p_name:null})
+   ]);
+   if(own.error)throw own.error;
+   players=p;events=e;calendarEvents=c;myPlayer=own.data;
+   if(window.__zhtiFcmToken&&myPlayer?.registered)window.onFcmToken(window.__zhtiFcmToken);
+   if(myPlayer?.registered){
+    const b=await db.rpc('zhti_battles',{p_token:token,p_action:'list',p_payload:{}});
+    if(b.error)throw b.error;
+    incomingBattles=b.data?.incoming||[];
+    notifyNewBattleChallenges(incomingBattles);
+   } else incomingBattles=[];
+   loadCallsign();render();status('Подключено · общие данные обновлены');
+  }catch(e){status('Ошибка загрузки: '+(e.message||'Не удалось загрузить данные'))}
+ })();
+ try{return await loadPromise}finally{
+  loadPromise=null;
+  if(loadAgain){loadAgain=false;if(!document.hidden)setTimeout(()=>load(),250)}
+ }
+}
 $('adminToggle').onclick=()=>{$('adminArea').classList.toggle('hidden')};
 $('adminLogin').onclick=async()=>{const p=$('adminPasswordInput').value;if(!p)return alert('Введи пароль');try{const {data,error}=await db.rpc('zhti_admin_write',{p_password:p,p_action:'check',p_payload:{}});if(error)throw error;adminPassword=p;$('adminPasswordInput').value='';$('adminMessage').textContent='Режим администратора включён';$('adminLogout').classList.remove('hidden');$('adminLogin').classList.add('hidden');$('adminPasswordInput').classList.add('hidden');$('addPlayer').classList.remove('hidden');$('recordTab').classList.remove('hidden');$('calendarAddToggle').classList.remove('hidden');$('adminWorkSettings').classList.remove('hidden');render()}catch(e){alert(e.message)}};
 $('adminLogout').onclick=()=>{adminPassword=null;$('adminMessage').textContent='Режим администратора выключен';$('adminLogout').classList.add('hidden');$('adminLogin').classList.remove('hidden');$('adminPasswordInput').classList.remove('hidden');$('addPlayer').classList.add('hidden');$('recordTab').classList.add('hidden');$('calendarAddToggle').classList.add('hidden');$('adminWorkSettings').classList.add('hidden');$('workSettingsPanel').classList.add('hidden');$('calendarAdminForm').classList.add('hidden');if(document.querySelector('.tabs button.active')?.dataset.tab==='record')document.querySelector('.tabs button[data-tab=players]').click();render()};
 async function adminWrite(action,payload){if(!isAdmin())throw new Error('Сначала войди как администратор');const {data,error}=await db.rpc('zhti_admin_write',{p_password:adminPassword,p_action:action,p_payload:payload});if(error)throw error;return data}
 $('workSettingsToggle').onclick=()=>{$('workSettingsPanel').classList.toggle('hidden')};
 $('deleteAllPlayers').onclick=async()=>{if(!isAdmin())return alert('Только администратор может выполнять это действие');if(!confirm('ВНИМАНИЕ! Удалить ВСЕ аккаунты пользователей, все профили игроков, все игровые записи и все активные сессии? После этого всем, включая тебя, придётся зарегистрироваться заново. События календаря останутся. Это действие нельзя отменить. Продолжить?'))return;const btn=$('deleteAllPlayers');btn.disabled=true;btn.textContent='Удаляем аккаунты…';try{const result=await adminWrite('delete_all_accounts',{});localStorage.removeItem('zhti_account_token');localStorage.removeItem('zhti_account_name');alert('Готово. Удалено аккаунтов: '+(result.deleted_accounts??'—')+'. Игроков: '+(result.deleted_players??'—')+'. Все игровые записи и сессии удалены. Теперь можно зарегистрироваться заново.');location.reload()}catch(e){alert('Не удалось удалить аккаунты: '+e.message);btn.disabled=false;btn.textContent='Мгновенно удалить всех игроков и аккаунты'}};
-$('tabs').onclick=e=>{let b=e.target.closest('button[data-tab]');if(!b)return;document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('main section').forEach(x=>x.classList.toggle('hidden',x.id!==b.dataset.tab));render();load()};
+$('tabs').onclick=e=>{let b=e.target.closest('button[data-tab]');if(!b)return;document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('main section').forEach(x=>x.classList.toggle('hidden',x.id!==b.dataset.tab));render()};
 const pname=id=>players.find(p=>p.id===id)?.name||'Удалённый игрок';
 const pts=e=>Number(e.points||0);
 function score(id,from,to){return events.filter(e=>(e.killer_id===id||e.victim_id===id)&&(!from||e.occurred_at.slice(0,10)>=from)&&(!to||e.occurred_at.slice(0,10)<=to)).reduce((s,e)=>{if(e.kind==='death')return s+(e.victim_id===id?pts(e):0);const transfer=Math.abs(pts(e));return s+(e.killer_id===id?transfer:0)-(e.victim_id===id?transfer:0)},0)}
