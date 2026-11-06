@@ -53,6 +53,7 @@ const URL='https://jylcbiznpnaezxeumcsm.supabase.co',KEY='sb_publishable_xeLszRP
 const db=supabaseClient.createClient(URL,KEY);
 window.onFcmToken=async token=>{
  if(!token)return;
+ window.__zhtiFcmToken=token;
  const session=localStorage.getItem('zhti_account_token');
  if(!session)return;
  if(localStorage.getItem('zhti_fcm_registered')===token)return;
@@ -64,7 +65,7 @@ window.onFcmToken=async token=>{
  }catch(e){console.warn('FCM token registration failed:',e.message||e)}
 };
 const $=id=>document.getElementById(id);let players=[],events=[],calendarEvents=[],incomingBattles=[],myPlayer=null,adminPassword=null,view=new Date(),selected=new Date().toISOString().slice(0,10),authMode='register';
-function showLobby(username){$('authScreen').classList.add('app-hidden');$('appRoot').classList.remove('app-hidden');$('welcomeUser').textContent='Вы вошли как: '+username;$('profileUser').textContent='Аккаунт: '+username;loadCallsign();maybeAskNotifications()}
+function showLobby(username){$('authScreen').classList.add('app-hidden');$('appRoot').classList.remove('app-hidden');$('welcomeUser').textContent='Вы вошли как: '+username;$('profileUser').textContent='Аккаунт: '+username;loadCallsign();maybeAskNotifications();if(window.__zhtiFcmToken)window.onFcmToken(window.__zhtiFcmToken)}
 function maybeAskNotifications(){if(localStorage.getItem('zhti_notification_prompted')==='1')return;$('notifyPrompt').classList.remove('hidden')}
 $('allowNotifications').onclick=()=>{localStorage.setItem('zhti_notification_prompted','1');$('notifyPrompt').classList.add('hidden');if(window.AndroidNotifications&&typeof window.AndroidNotifications.requestPermission==='function'){window.AndroidNotifications.requestPermission()}else if('Notification' in window){Notification.requestPermission().catch(()=>{})}};
 $('laterNotifications').onclick=()=>{localStorage.setItem('zhti_notification_prompted','1');$('notifyPrompt').classList.add('hidden')};
