@@ -70,7 +70,7 @@ const supabaseClient = {
   };
  }
 };
-const URL='https://zhti-relay.lesenokdany.workers.dev',KEY='sb_publishable_xeLszRP0RSYub9YouIq8Ug_i7FEhJY3';
+const URL='https://jylcbiznpnaezxeumcsm.supabase.co',KEY='sb_publishable_xeLszRP0RSYub9YouIq8Ug_i7FEhJY3';
 const db=supabaseClient.createClient(URL,KEY);
 const $=id=>document.getElementById(id);let players=[],events=[],calendarEvents=[],incomingBattles=[],myPlayer=null,adminPassword=null,view=new Date(),selected=new Date().toISOString().slice(0,10),authMode='register';
 function showLobby(username){$('authScreen').classList.add('app-hidden');$('appRoot').classList.remove('app-hidden');$('welcomeUser').textContent='Вы вошли как: '+username;$('profileUser').textContent='Аккаунт: '+username;loadCallsign()}
