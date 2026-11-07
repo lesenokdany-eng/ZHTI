@@ -88,7 +88,7 @@ function status(t){$('status').textContent=t}
 $('refreshBtn').onclick=()=>load();
 let lastAutoLoad=0;
 window.addEventListener('focus',()=>{if(Date.now()-lastAutoLoad>20000){lastAutoLoad=Date.now();load()}});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastAutoLoad>20000){lastAutoLoad=Date.now();load();refreshMessengerSettings()}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastAutoLoad>20000){lastAutoLoad=Date.now();load()}});
 setInterval(()=>{if(!document.hidden){lastAutoLoad=Date.now();load()}},30000);
 function loadCallsign(){const v=myPlayer?.callsign||'';$('callsignInput').value=v;$('callsignMessage').textContent=v?'Позывной в общей таблице: '+v:'Позывной ещё не добавлен в таблицу.'}
 $('saveCallsign').onclick=async()=>{const v=$('callsignInput').value.trim();if(v.length>32){$('callsignMessage').textContent='Позывной должен быть не длиннее 32 символов.';return}const btn=$('saveCallsign');btn.disabled=true;$('callsignMessage').textContent='Сохраняем в общую таблицу…';try{const {data,error}=await db.rpc('zhti_update_callsign',{p_token:localStorage.getItem('zhti_account_token'),p_callsign:v});if(error)throw error;myPlayer={...myPlayer,...data,registered:true};$('callsignMessage').textContent=v?'Позывной добавлен в общую таблицу: '+v:'Позывной удалён из таблицы.';await load()}catch(e){$('callsignMessage').textContent=e.message||'Не удалось сохранить позывной'}finally{btn.disabled=false}};
