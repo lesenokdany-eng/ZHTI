@@ -87,8 +87,8 @@ const call=async(q)=>{const {data,error}=await q;if(error)throw error;return dat
 function status(t){$('status').textContent=t}
 $('refreshBtn').onclick=()=>load();
 let lastAutoLoad=0;
-window.addEventListener('focus',()=>{if(Date.now()-lastAutoLoad>20000){lastAutoLoad=Date.now();load()}});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastAutoLoad>20000){lastAutoLoad=Date.now();load()}});
+window.addEventListener('focus',()=>{if(Date.now()-lastAutoLoad>20000){lastAutoLoad=Date.now();load();refreshMessengerSettings()}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastAutoLoad>20000){lastAutoLoad=Date.now();load();refreshMessengerSettings()}});
 setInterval(()=>{if(!document.hidden){lastAutoLoad=Date.now();load()}},30000);
 const MESSENGER_FN='https://jylcbiznpnaezxeumcsm.supabase.co/functions/v1/zhti-messenger-settings';
 let messengerSettings={telegram:{linked:false,enabled:false},max:{linked:false,enabled:false}};
