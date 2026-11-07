@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111"><title>ЖТИ — Центр уведомлений</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0b0b0e;color:#f5f5f5;font:16px system-ui,Arial,sans-serif;min-height:100vh;display:grid;place-items:center;padding:22px}.wrap{width:min(100%,460px)}.brand{text-align:center;margin-bottom:24px}.brand h1{font-size:42px;letter-spacing:5px;margin:0;color:#f5f5f5}.brand p{color:#aaa;font-size:11px;letter-spacing:2px;margin:4px}.card{background:#17171c;border:1px solid #333;border-radius:18px;padding:24px;box-shadow:0 20px 70px #0008}h2{margin:0 0 8px;font-size:23px}p{color:#aaa;line-height:1.5}.field{display:grid;gap:7px;margin:17px 0}label{font-size:13px;color:#ccc}input{width:100%;padding:14px;border-radius:10px;border:1px solid #444;background:#0e0e12;color:white;font-size:16px;outline:none}input:focus{border-color:#e5232d}button{width:100%;border:0;border-radius:10px;padding:14px;background:#e5232d;color:white;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px}button.secondary{background:#303038}button:disabled{opacity:.5;cursor:wait}.hidden{display:none!important}.status{padding:12px;border-radius:10px;background:#24242b;color:#ddd;font-size:14px;margin-top:16px;white-space:pre-wrap}.muted{font-size:12px;color:#888}.row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:20px 0}.switch{width:54px;height:30px;appearance:none;background:#444;border-radius:20px;position:relative;cursor:pointer;flex:none}.switch:checked{background:#e5232d}.switch:before{content:"";position:absolute;width:22px;height:22px;left:4px;top:4px;background:white;border-radius:50%;transition:.15s}.switch:checked:before{transform:translateX(24px)}a{color:#ff666d}.foot{text-align:center;color:#777;font-size:12px;margin-top:16px}
+</style></head><body><main class="wrap"><header class="brand"><h1>ЖТИ</h1><p>ЦЕНТР УВЕДОМЛЕНИЙ</p></header>
+<section class="card" id="login"><h2>Вход в аккаунт</h2><p>Используй тот же ник и пароль, что и в приложении ЖТИ.</p>
+<div class="field"><label for="username">Ник</label><input id="username" autocomplete="username" maxlength="24" placeholder="Твой ник"></div>
+<div class="field"><label for="password">Пароль</label><input id="password" type="password" autocomplete="current-password" placeholder="Пароль от ЖТИ"></div>
+<button id="loginBtn">Войти</button><div class="status hidden" id="loginStatus"></div>
+</section>
+<section class="card hidden" id="panel"><h2>Настройки почты</h2><p>Привяжи адрес электронной почты, чтобы получать игровые вызовы, даже если push-уведомления не работают.</p>
+<div class="field"><label for="email">Электронная почта</label><input id="email" type="email" autocomplete="email" placeholder="name@example.com"></div>
+<button id="sendBtn">Отправить письмо для подтверждения</button>
+<div class="row"><div><b>Получать вызовы на почту</b><div class="muted" id="verifiedText">Сначала подтверди адрес</div></div><input class="switch" id="enabled" type="checkbox" disabled></div>
+<div class="status hidden" id="panelStatus"></div><button class="secondary" id="logoutBtn">Выйти из аккаунта</button>
+</section>
+<div class="foot">ЖТИ · Единые страницы информации чата</div></main>
+<script>
+const URL="https://jylcbiznpnaezxeumcsm.supabase.co";
+const ANON="sb_publishable_xeLszRP0RSYub9YouIq8Ug_i7FEhJY3";
+const FN=URL+"/functions/v1/zhti-email-notifications";
+let session="";
+const $=id=>document.getElementById(id);
+function status(id,msg){const e=$(id);e.textContent=msg;e.classList.remove("hidden")}
+async function rpc(name,args){const r=await fetch(URL+"/rest/v1/rpc/"+name,{method:"POST",headers:{"Content-Type":"application/json","apikey":ANON,"Authorization":"Bearer "+ANON},body:JSON.stringify(args)});const d=await r.json();if(!r.ok)throw Error(d.message||d.error||"Ошибка запроса");return d}
+async function edge(body){const r=await fetch(FN,{method:"POST",headers:{"Content-Type":"application/json","apikey":ANON},body:JSON.stringify(body)});const d=await r.json();if(!r.ok)throw Error(d.error||"Ошибка сервера");return d}
+function showPanel(){ $("login").classList.add("hidden");$("panel").classList.remove("hidden");loadSettings()}
+function showLogin(){ $("panel").classList.add("hidden");$("login").classList.remove("hidden")}
+async function loadSettings(){try{const d=await edge({action:"settings",session_token:session});$("email").value=d.email||"";$("enabled").checked=!!d.enabled;$("enabled").disabled=!d.verified;$("verifiedText").textContent=d.verified?"Адрес подтверждён":"Адрес не подтверждён";if(d.verified)$("sendBtn").textContent="Изменить адрес почты"}catch(e){status("panelStatus",e.message)}}
+$("loginBtn").onclick=async()=>{const b=$("loginBtn");b.disabled=true;try{const d=await rpc("zhti_account_auth",{p_action:"login",p_username:$("username").value,p_password:$("password").value});session=d.token;showPanel()}catch(e){status("loginStatus",e.message)}finally{b.disabled=false}};
+$("sendBtn").onclick=async()=>{try{await edge({action:"request_verification",session_token:session,email:$("email").value});status("panelStatus","Письмо отправлено. Проверь входящие и папку «Спам». Ссылка действует 30 минут.")}catch(e){status("panelStatus",e.message)}};
+$("enabled").onchange=async()=>{try{await edge({action:"toggle",session_token:session,enabled:$("enabled").checked});status("panelStatus","Настройка сохранена.")}catch(e){$("enabled").checked=!$("enabled").checked;status("panelStatus",e.message)}};
+$("logoutBtn").onclick=()=>{session="";showLogin()};
+(async()=>{const token=new URLSearchParams(location.search).get("verify");if(token){try{await edge({action:"verify",token});history.replaceState({},"",location.pathname);status("loginStatus","Почта успешно подтверждена! Теперь войди в аккаунт ЖТИ и включи уведомления.");}catch(e){status("loginStatus",e.message)}}})();
+</script></body></html>
