@@ -134,8 +134,9 @@ async function saveMessengerBot(platform){
  const hookSecret=Array.from(bytes).map(x=>x.toString(16).padStart(2,'0')).join('');
  button.disabled=true;$('messengerAdminMessage').textContent='Сохраняем защищённые настройки…';
  try{
-  const saved=await db.rpc('zhti_messenger_save_config',{p_admin_password:adminPassword,p_platform:platform,p_bot_token:token,p_bot_username:username,p_webhook_secret:hookSecret});
-  if(saved.error)throw saved.error;
+  const saveResponse=await fetch('https://jylcbiznpnaezxeumcsm.supabase.co/rest/v1/rpc/zhti_messenger_save_config',{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},body:JSON.stringify({p_admin_password:adminPassword,p_platform:platform,p_bot_token:token,p_bot_username:username,p_webhook_secret:hookSecret})});
+  const saved=await saveResponse.json().catch(()=>({}));
+  if(!saveResponse.ok)throw new Error(saved.message||saved.error||'Не удалось сохранить настройки бота');
   const r=await fetch('https://jylcbiznpnaezxeumcsm.supabase.co/functions/v1/zhti-messenger-configure',{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},body:JSON.stringify({admin_password:adminPassword,platform})});
   const d=await r.json().catch(()=>({}));
   if(!r.ok)throw new Error(d.error||'Не удалось настроить webhook');
