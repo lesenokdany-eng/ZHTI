@@ -18,7 +18,7 @@
 <div class="status" id="status">Подключение к общей базе…</div><div class="actions" style="margin:-4px 0 12px"><button id="refreshBtn" class="secondary">↻ Обновить данные</button></div><div class="row"><span id="welcomeUser" class="muted"></span><button id="accountLogout" class="secondary">Выйти из аккаунта</button></div>
 <div class="panel"><div class="actions"><button id="adminToggle" class="secondary">Администратор</button></div><div id="adminArea" class="hidden"><label>Пароль администратора</label><input id="adminPasswordInput" type="password" placeholder="Введите пароль"><div class="actions"><button id="adminLogin">Войти</button><button id="adminLogout" class="secondary hidden">Выйти из режима администратора</button></div><p class="muted" id="adminMessage">Режим администратора защищён паролем.</p><div id="adminWorkSettings" class="hidden" style="margin-top:12px;border-top:1px solid #444;padding-top:12px"><button id="workSettingsToggle" class="secondary">Рабочие настройки</button><div id="workSettingsPanel" class="hidden" style="margin-top:10px"><h3>Рабочие настройки</h3><p class="muted">Опасные действия с общей таблицей игроков.</p><button id="deleteAllPlayers" class="danger">Мгновенно удалить всех игроков и аккаунты</button></div></div></div></div>
 <div class="tabs" id="tabs"><button data-tab="players" class="active">Игроки</button><button data-tab="profile">Профиль</button><button data-tab="record" id="recordTab" class="hidden">Записать</button><button data-tab="calendar">Календарь</button><button data-tab="battles">Битвы</button><button data-tab="leaders">Победители</button><button data-tab="history">История</button></div>
-<section id="profile" class="panel hidden"><h2>Профиль</h2><p class="muted" id="profileUser"></p><label>Твой позывной</label><input id="callsignInput" maxlength="32" placeholder="Придумай позывной"><button id="saveCallsign">Сохранить позывной</button><p class="muted" id="callsignMessage">Позывной можно изменить в любое время.</p><div class="card" style="margin-top:16px"><h3>Уведомления в мессенджерах</h3><p class="muted">Привяжи Telegram и MAX, чтобы получать сюда вызовы и объявления о новых событиях календаря.</p><div class="row"><div><b>Telegram</b><div class="muted" id="telegramStatus">Проверяем…</div></div><button id="connectTelegram">Подключить</button></div><button class="secondary" id="toggleTelegram" disabled>Уведомления Telegram</button><div class="row"><div><b>MAX</b><div class="muted" id="maxStatus">Проверяем…</div></div><button id="connectMax">Подключить</button></div><button class="secondary" id="toggleMax" disabled>Уведомления MAX</button><p class="muted" id="messengerMessage">Для привязки открой бота по ссылке и нажми «Начать». Номер телефона не требуется.</p><div id="messengerAdminConfig" class="hidden" style="border-top:1px solid #444;margin-top:14px;padding-top:12px"><h3>Настройка ботов · администратор</h3><p class="muted">Токены сохраняются в зашифрованном хранилище Supabase. Не отправляй их в чат.</p><label>Telegram — токен бота</label><input id="telegramBotToken" type="password" autocomplete="off" placeholder="Токен от BotFather"><label>Telegram — имя бота без @</label><input id="telegramBotUsername" maxlength="64" placeholder="Например, ZHTI_alerts_bot"><button id="saveTelegramBot">Сохранить и подключить Telegram</button><label style="margin-top:14px">MAX — токен бота</label><input id="maxBotToken" type="password" autocomplete="off" placeholder="Токен из платформы MAX"><label>MAX — имя бота без @</label><input id="maxBotUsername" maxlength="64" placeholder="Имя бота в MAX"><button id="saveMaxBot">Сохранить и подключить MAX</button><p class="muted" id="messengerAdminMessage"></p></div></div></section>
+<section id="profile" class="panel hidden"><h2>Профиль</h2><p class="muted" id="profileUser"></p><label>Твой позывной</label><input id="callsignInput" maxlength="32" placeholder="Придумай позывной"><button id="saveCallsign">Сохранить позывной</button><p class="muted" id="callsignMessage">Позывной можно изменить в любое время.</p></section>
 <section id="players" class="panel"><h2>Игроки</h2><div class="card" id="selfPlayerBox"><h3>Твой игрок в общей таблице</h3><p class="muted" id="selfPlayerMessage">Ник аккаунта автоматически добавляется в таблицу при регистрации.</p></div><div id="addPlayer" class="hidden"><label>Имя или ник</label><input id="playerName" maxlength="40" placeholder="Ник игрока"><button id="addPlayerBtn">Добавить игрока</button></div><div id="playersList"></div></section>
 <section id="record" class="panel hidden"><h2>Новое событие</h2><label>Убийца</label><select id="killer"></select><label>Жертва</label><select id="victim"></select><label>Тип</label><select id="kind"><option value="head">Хэдшот (+3)</option><option value="body">В тело (+2)</option><option value="other">Другое убийство (+1)</option><option value="death">Смерть (−2)</option></select><button id="saveEvent">Записать событие</button><p class="muted">Записи доступны всем. Создавать их может только администратор.</p></section>
 <section id="calendar" class="panel hidden"><h2>Календарь</h2><div class="actions"><button id="calendarAddToggle" class="hidden">＋ Добавить событие</button></div><div id="calendarAdminForm" class="card hidden"><h3>Новое событие в календаре</h3><label>Дата события</label><input id="calendarEventDate" type="date"><label>Название события</label><input id="calendarEventTitle" maxlength="100" placeholder="Например, командный турнир"><label>Описание</label><textarea id="calendarEventDescription" maxlength="2000" rows="3" style="width:100%;margin:5px 0 10px;background:#252525;color:white;border:1px solid #444;border-radius:8px;padding:11px;font:inherit"></textarea><label>Дата и время начала сбора</label><input id="calendarGatheringAt" type="datetime-local"><div class="actions"><button id="calendarSave">Сохранить событие</button><button id="calendarCancel" class="secondary">Отмена</button></div><p class="muted" id="calendarFormMessage"></p></div><div class="actions"><button id="prev" class="secondary">←</button><b id="monthLabel"></b><button id="next" class="secondary">→</button></div><div class="calendar" id="grid"></div><h3 id="dayLabel">События дня</h3><div id="dayEvents"></div></section>
@@ -72,7 +72,7 @@ window.onFcmToken=async token=>{
  }catch(e){console.warn('FCM token registration failed:',e.message||e)}
 };
 const $=id=>document.getElementById(id);let players=[],events=[],calendarEvents=[],incomingBattles=[],myPlayer=null,adminPassword=null,view=new Date(),selected=new Date().toISOString().slice(0,10),authMode='register';
-function showLobby(username){$('authScreen').classList.add('app-hidden');$('appRoot').classList.remove('app-hidden');$('welcomeUser').textContent='Вы вошли как: '+username;$('profileUser').textContent='Аккаунт: '+username;loadCallsign();refreshMessengerSettings();maybeAskNotifications();if(window.__zhtiFcmToken)window.onFcmToken(window.__zhtiFcmToken)}
+function showLobby(username){$('authScreen').classList.add('app-hidden');$('appRoot').classList.remove('app-hidden');$('welcomeUser').textContent='Вы вошли как: '+username;$('profileUser').textContent='Аккаунт: '+username;loadCallsign();maybeAskNotifications();if(window.__zhtiFcmToken)window.onFcmToken(window.__zhtiFcmToken)}
 function maybeAskNotifications(){if(localStorage.getItem('zhti_notification_prompted')==='1')return;$('notifyPrompt').classList.remove('hidden')}
 $('allowNotifications').onclick=()=>{localStorage.setItem('zhti_notification_prompted','1');$('notifyPrompt').classList.add('hidden');if(window.AndroidNotifications&&typeof window.AndroidNotifications.requestPermission==='function'){window.AndroidNotifications.requestPermission()}else if('Notification' in window){Notification.requestPermission().catch(()=>{})}};
 $('laterNotifications').onclick=()=>{localStorage.setItem('zhti_notification_prompted','1');$('notifyPrompt').classList.add('hidden')};
@@ -87,76 +87,9 @@ const call=async(q)=>{const {data,error}=await q;if(error)throw error;return dat
 function status(t){$('status').textContent=t}
 $('refreshBtn').onclick=()=>load();
 let lastAutoLoad=0;
-window.addEventListener('focus',()=>{if(Date.now()-lastAutoLoad>20000){lastAutoLoad=Date.now();load();refreshMessengerSettings()}});
+window.addEventListener('focus',()=>{if(Date.now()-lastAutoLoad>20000){lastAutoLoad=Date.now();load()}});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastAutoLoad>20000){lastAutoLoad=Date.now();load();refreshMessengerSettings()}});
 setInterval(()=>{if(!document.hidden){lastAutoLoad=Date.now();load()}},30000);
-const MESSENGER_FN='https://jylcbiznpnaezxeumcsm.supabase.co/functions/v1/zhti-messenger-settings';
-let messengerSettings={telegram:{linked:false,enabled:false},max:{linked:false,enabled:false}};
-async function messengerRequest(payload){
- const r=await fetch(MESSENGER_FN,{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},body:JSON.stringify({...payload,session_token:localStorage.getItem('zhti_account_token')})});
- const d=await r.json().catch(()=>({}));
- if(!r.ok)throw new Error(d.error||'Ошибка мессенджера');
- return d;
-}
-function renderMessengerSettings(){
- for(const p of ['telegram','max']){
-  const s=messengerSettings[p]||{linked:false,enabled:false};
-  const status=$(p==='telegram'?'telegramStatus':'maxStatus');
-  const toggle=$(p==='telegram'?'toggleTelegram':'toggleMax');
-  const connect=$(p==='telegram'?'connectTelegram':'connectMax');
-  status.textContent=s.linked?(s.enabled?'Подключён · уведомления включены':'Подключён · уведомления выключены'):'Не подключён';
-  toggle.disabled=!s.linked;
-  toggle.textContent=s.enabled?'Выключить уведомления':'Включить уведомления';
-  connect.textContent=s.linked?'Перепривязать':'Подключить';
- }
-}
-async function refreshMessengerSettings(){
- try{messengerSettings=await messengerRequest({action:'settings'});renderMessengerSettings()}
- catch(e){$('messengerMessage').textContent=e.message||'Не удалось загрузить настройки мессенджеров'}
-}
-async function connectMessenger(platform){
- const button=$(platform==='telegram'?'connectTelegram':'connectMax');
- button.disabled=true;
- try{
-  const d=await messengerRequest({action:'create_link',platform});
-  if(d.deep_link){$('messengerMessage').textContent='Открой бота и нажми «Начать». После привязки вернись в ЖТИ.';window.location.href=d.deep_link}
-  else{$('messengerMessage').textContent='Код подключения: '+d.code+'. Ссылка появится после настройки имени бота на сервере. Код действует 10 минут.'}
- }catch(e){$('messengerMessage').textContent=e.message||'Не удалось создать ссылку'}
- finally{button.disabled=false}
-}
-async function saveMessengerBot(platform){
- if(!isAdmin()||!adminPassword)return alert('Сначала войди в режим администратора');
- const token=$(platform==='telegram'?'telegramBotToken':'maxBotToken').value.trim();
- const username=$(platform==='telegram'?'telegramBotUsername':'maxBotUsername').value.trim().replace(/^@/,'');
- const button=$(platform==='telegram'?'saveTelegramBot':'saveMaxBot');
- if(!token||!username)return alert('Введи токен и имя бота');
- const bytes=new Uint8Array(24);crypto.getRandomValues(bytes);
- const hookSecret=Array.from(bytes).map(x=>x.toString(16).padStart(2,'0')).join('');
- button.disabled=true;$('messengerAdminMessage').textContent='Сохраняем защищённые настройки…';
- try{
-  const saveResponse=await fetch('https://jylcbiznpnaezxeumcsm.supabase.co/rest/v1/rpc/zhti_messenger_save_config',{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},body:JSON.stringify({p_admin_password:adminPassword,p_platform:platform,p_bot_token:token,p_bot_username:username,p_webhook_secret:hookSecret})});
-  const saved=await saveResponse.json().catch(()=>({}));
-  if(!saveResponse.ok)throw new Error(saved.message||saved.error||'Не удалось сохранить настройки бота');
-  const r=await fetch('https://jylcbiznpnaezxeumcsm.supabase.co/functions/v1/zhti-messenger-configure',{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},body:JSON.stringify({admin_password:adminPassword,platform})});
-  const d=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(d.error||'Не удалось настроить webhook');
-  $('messengerAdminMessage').textContent=d.webhook_configured?'Бот подключён. Webhook работает: '+d.bot_username:'Токен сохранён, но webhook не настроен: '+(d.detail||'проверь токен и повтори');
-  $(platform==='telegram'?'telegramBotToken':'maxBotToken').value='';
-  await refreshMessengerSettings();
- }catch(e){$('messengerAdminMessage').textContent=e.message||'Ошибка настройки бота'}
- finally{button.disabled=false}
-}
-$('saveTelegramBot').onclick=()=>saveMessengerBot('telegram');
-$('saveMaxBot').onclick=()=>saveMessengerBot('max');
-async function toggleMessenger(platform){
- const current=messengerSettings[platform]?.enabled===true;
- try{await messengerRequest({action:'toggle',platform,enabled:!current});await refreshMessengerSettings()}
- catch(e){$('messengerMessage').textContent=e.message||'Не удалось изменить настройку'}
-}
-$('connectTelegram').onclick=()=>connectMessenger('telegram');
-$('connectMax').onclick=()=>connectMessenger('max');
-$('toggleTelegram').onclick=()=>toggleMessenger('telegram');
-$('toggleMax').onclick=()=>toggleMessenger('max');
 function loadCallsign(){const v=myPlayer?.callsign||'';$('callsignInput').value=v;$('callsignMessage').textContent=v?'Позывной в общей таблице: '+v:'Позывной ещё не добавлен в таблицу.'}
 $('saveCallsign').onclick=async()=>{const v=$('callsignInput').value.trim();if(v.length>32){$('callsignMessage').textContent='Позывной должен быть не длиннее 32 символов.';return}const btn=$('saveCallsign');btn.disabled=true;$('callsignMessage').textContent='Сохраняем в общую таблицу…';try{const {data,error}=await db.rpc('zhti_update_callsign',{p_token:localStorage.getItem('zhti_account_token'),p_callsign:v});if(error)throw error;myPlayer={...myPlayer,...data,registered:true};$('callsignMessage').textContent=v?'Позывной добавлен в общую таблицу: '+v:'Позывной удалён из таблицы.';await load()}catch(e){$('callsignMessage').textContent=e.message||'Не удалось сохранить позывной'}finally{btn.disabled=false}};
 let loadPromise=null,loadAgain=false;
@@ -199,7 +132,7 @@ const pname=id=>players.find(p=>p.id===id)?.name||'Удалённый игрок
 const pts=e=>Number(e.points||0);
 function score(id,from,to){return events.filter(e=>(e.killer_id===id||e.victim_id===id)&&(!from||e.occurred_at.slice(0,10)>=from)&&(!to||e.occurred_at.slice(0,10)<=to)).reduce((s,e)=>{if(e.kind==='death')return s+(e.victim_id===id?pts(e):0);const transfer=Math.abs(pts(e));return s+(e.killer_id===id?transfer:0)-(e.victim_id===id?transfer:0)},0)}
 function eventText(e){if(e.kind==='death')return pname(e.victim_id)+' — смерть (−2)';const n=Math.abs(pts(e));return pname(e.killer_id)+' → '+pname(e.victim_id)+' — '+({head:'хэдшот',body:'в тело',other:'убийство'}[e.kind]||e.kind)+' (убийце +'+n+', жертве −'+n+')'}
-function render(){const admin=isAdmin();$('messengerAdminConfig').classList.toggle('hidden',!admin);renderSelfPlayer();renderBattleUI();$('playersList').innerHTML=players.length?players.map(p=>'<div class="row"><span>'+esc(p.name)+(p.callsign?' <span class="muted">· позывной: '+esc(p.callsign)+'</span>':'')+' <b class="score">'+score(p.id)+' оч.</b></span>'+(admin?'<button class="danger" onclick="delPlayer(\''+p.id+'\')">Удалить</button>':'' )+'</div>').join(''):'<p class="muted">Пока нет игроков.</p>';
+function render(){const admin=isAdmin();renderSelfPlayer();renderBattleUI();$('playersList').innerHTML=players.length?players.map(p=>'<div class="row"><span>'+esc(p.name)+(p.callsign?' <span class="muted">· позывной: '+esc(p.callsign)+'</span>':'')+' <b class="score">'+score(p.id)+' оч.</b></span>'+(admin?'<button class="danger" onclick="delPlayer(\''+p.id+'\')">Удалить</button>':'' )+'</div>').join(''):'<p class="muted">Пока нет игроков.</p>';
 const opts=players.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('');$('killer').innerHTML=opts;$('victim').innerHTML=opts;$('saveEvent').disabled=!admin;
 $('historyList').innerHTML=events.length?events.map(e=>'<div class="event">'+esc(eventText(e))+'<div class="muted">'+new Date(e.occurred_at).toLocaleString('ru-RU')+'</div>'+(admin?'<button class="danger" onclick="delEvent(\''+e.id+'\')">Отменить</button>':'')+'</div>').join(''):'<p class="muted">Записей пока нет.</p>';calendar();leaders()}
 
@@ -237,7 +170,7 @@ window.pick=k=>{selected=k;showDay()};function showDay(){$('dayLabel').textConte
 $('prev').onclick=()=>{view.setMonth(view.getMonth()-1);calendar()};$('next').onclick=()=>{view.setMonth(view.getMonth()+1);calendar()};
 $('calendarAddToggle').onclick=()=>{$('calendarAdminForm').classList.toggle('hidden');if(!$('calendarEventDate').value)$('calendarEventDate').value=selected};
 $('calendarCancel').onclick=()=>{$('calendarAdminForm').classList.add('hidden');$('calendarFormMessage').textContent=''};
-$('calendarSave').onclick=async()=>{if(!isAdmin())return alert('Только администратор может добавлять события');const event_date=$('calendarEventDate').value,title=$('calendarEventTitle').value.trim(),description=$('calendarEventDescription').value.trim(),gathering_at=$('calendarGatheringAt').value;if(!event_date||!title||!gathering_at)return alert('Заполни дату события, название и дату/время сбора');const btn=$('calendarSave');btn.disabled=true;$('calendarFormMessage').textContent='Сохраняем…';try{const created=await adminWrite('add_calendar_event',{event_date,title,description,gathering_at:new Date(gathering_at).toISOString()});if(created?.id){try{const notify=await fetch('https://jylcbiznpnaezxeumcsm.supabase.co/functions/v1/zhti-send-calendar-event',{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},body:JSON.stringify({event_id:created.id,admin_password:adminPassword})});const notifyResult=await notify.json().catch(()=>({}));if(!notify.ok)console.warn('Calendar messenger notification failed:',notifyResult.error||notify.status);else console.log('Calendar messenger notification:',notifyResult)}catch(notifyError){console.warn('Calendar notification request failed:',notifyError)}}selected=event_date;view=new Date(event_date+'T12:00:00');$('calendarEventTitle').value='';$('calendarEventDescription').value='';$('calendarGatheringAt').value='';$('calendarAdminForm').classList.add('hidden');await load();alert('Событие добавлено в общий календарь')}catch(e){$('calendarFormMessage').textContent=e.message;alert(e.message)}finally{btn.disabled=false}};
+$('calendarSave').onclick=async()=>{if(!isAdmin())return alert('Только администратор может добавлять события');const event_date=$('calendarEventDate').value,title=$('calendarEventTitle').value.trim(),description=$('calendarEventDescription').value.trim(),gathering_at=$('calendarGatheringAt').value;if(!event_date||!title||!gathering_at)return alert('Заполни дату события, название и дату/время сбора');const btn=$('calendarSave');btn.disabled=true;$('calendarFormMessage').textContent='Сохраняем…';try{const created=await adminWrite('add_calendar_event',{event_date,title,description,gathering_at:new Date(gathering_at).toISOString()});selected=event_date;view=new Date(event_date+'T12:00:00');$('calendarEventTitle').value='';$('calendarEventDescription').value='';$('calendarGatheringAt').value='';$('calendarAdminForm').classList.add('hidden');await load();alert('Событие добавлено в общий календарь')}catch(e){$('calendarFormMessage').textContent=e.message;alert(e.message)}finally{btn.disabled=false}};
 window.delCalendarEvent=async id=>{if(!isAdmin()||!confirm('Удалить событие из календаря?'))return;try{await adminWrite('delete_calendar_event',{id});await load()}catch(e){alert(e.message)}};
 function board(from,to){return players.map(p=>({name:p.name,points:score(p.id,from,to)})).sort((a,b)=>b.points-a.points)}
 function boardHtml(a){return a.map((p,i)=>'<div class="row">'+(i+1)+'. '+esc(p.name)+' <b class="score">'+p.points+' оч.</b></div>').join('')||'<p class="muted">Нет игроков.</p>'}
