@@ -10,11 +10,16 @@ import android.webkit.WebViewClient
 class MainActivity : Activity() {
     private lateinit var webView: WebView
 
+    companion object {
+        private const val APP_URL = "https://lesenokdany-eng.github.io/ZHTI/"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         webView = WebView(this)
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
+        webView.settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
         webView.webViewClient = WebViewClient()
         webView.webChromeClient = object : WebChromeClient() {
             override fun onConsoleMessage(message: ConsoleMessage): Boolean {
@@ -24,16 +29,11 @@ class MainActivity : Activity() {
         }
         setContentView(webView)
         if (savedInstanceState == null) {
-            val html = assets.open("index.html").bufferedReader(Charsets.UTF_8).use { it.readText() }
-            webView.loadDataWithBaseURL(
-                "https://jylcbiznpnaezxeumcsm.supabase.co/",
-                html,
-                "text/html",
-                "UTF-8",
-                null
-            )
+            webView.loadUrl(APP_URL)
         } else {
             webView.restoreState(savedInstanceState)
+            // Always check the live version when the app is reopened.
+            webView.post { webView.loadUrl(APP_URL) }
         }
     }
 
@@ -48,4 +48,3 @@ class MainActivity : Activity() {
         else super.onBackPressed()
     }
 }
-
